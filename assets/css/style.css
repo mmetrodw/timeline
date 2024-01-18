@@ -50,7 +50,11 @@ body {
 	flex: 0 0 var(--image-width);
 	align-self: auto;
 	clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
-	animation: image-in 1s cubic-bezier(.25 ,0, 0, 1) 2.1s forwards;
+	
+}
+
+.dwtl-active .dwtl-event-image {
+  animation: image-in 1s cubic-bezier(.25 ,0, 0, 1) 2.1s forwards;
 }
 
 @keyframes image-in {
@@ -71,6 +75,10 @@ body {
 	position: relative;
 	height: 100%;
 	padding: 20px;
+	
+	order: 0;
+	flex: 1 1 auto;
+	align-self: auto;
 
 	display: flex;
 	flex-direction: column;
@@ -100,7 +108,13 @@ body {
 
 .dwtl-event-date span {
 	transform: translateY(100%);
-	animation: period-date-in .5s cubic-bezier(.25 ,0, 0, 1) forwards;
+}
+
+.dwtl-active .dwtl-event-date span {
+  animation-name: period-date-in;
+  animation-duration: .5s;
+  animation-timing-function: cubic-bezier(.25, 0, 0, 1);
+  animation-fill-mode: forwards;
 }
 
 .dwtl-event-date span {
@@ -124,7 +138,10 @@ body {
 	font-weight: 700;
 	color: #F2F2F2;
 	transform: translateY(var(--start-position));
-	animation: heading-in 1s cubic-bezier(.25 ,0, 0, 1) 2s forwards;
+}
+
+.dwtl-active .dwtl-event-heading {
+  animation: translate-to-top 1s cubic-bezier(.25 ,0, 0, 1) 2s forwards;
 }
 
 @keyframes heading-in {
@@ -141,13 +158,34 @@ body {
 	font-weight: 400;
 	color: #F2F2F2;
 	transform: translateY(var(--start-position));
-	animation: content-in 1s cubic-bezier(.25 ,0, 0, 1) 2.2s forwards;
 }
 
-@keyframes content-in {
-	to {
-		transform: translateY(0px);
-	}
+.dwtl-active .dwtl-event-content {
+  animation: translate-to-top 1s cubic-bezier(.25 ,0, 0, 1) 2.2s forwards;
+}
+
+.dwtl-event-link {
+  position: relative;
+  padding: 5px 10px;
+  font-family: 'Inter', sans-serif;
+	font-size: 14px;
+	line-height: 15px;
+	font-weight: 700;
+	text-decoration: none;
+	color: #1B998B;
+	background: #F2F2F2;
+  border-radius: 5px;
+  transform: translateY(var(--start-position));
+}
+  
+.dwtl-active .dwtl-event-link {
+  animation: translate-to-top 1s cubic-bezier(.25, 0, 0, 1) 2.5s forwards;
+}
+
+@keyframes translate-to-top {
+  to {
+    transform: translateY(0px);
+  }
 }
 
 .dwtl-event-date-title {
@@ -155,13 +193,12 @@ body {
 	top: 50%;
 	left: 50%;
 	font-family: 'Inter', sans-serif;
-	font-size: 60px;
-	line-height: 60px;
+	font-size: 120px;
+	line-height: 120px;
 	font-weight: 900;
 	color: #F2F2F2;
 	transform-origin: 50% 50%;
 	transform: translate(-50%, -50%) scale(1);
-	animation: opener-date-scale 1s cubic-bezier(1, 0, .8, 1) forwards;
 	
 	display: flex;
 	flex-direction: row;
@@ -175,6 +212,10 @@ body {
 	pointer-events: none;
 }
 
+.dwtl-active .dwtl-event-date-title {
+  animation: opener-date-scale 1s cubic-bezier(1, 0, .8, 1) forwards;
+}
+
 @keyframes opener-date-scale {
 	0% {
 		transform: translate(-50%, -50%) scale(2);
@@ -184,11 +225,18 @@ body {
 	}
 }
 
+
 .dwtl-event-date-title span {
 	display: block;
 	transform-origin: 50% 50%;
 	transform: translateY(100%);
-	animation: opener-date-in-out 2s cubic-bezier(.25 ,0, 0, 1) forwards;
+}
+
+.dwtl-active .dwtl-event-date-title span {
+  animation-name: opener-date-in-out;
+  animation-duration: 2s;
+  animation-timing-function: cubic-bezier(.25 ,0, 0, 1);
+  animation-fill-mode: forwards;
 }
 
 .dwtl-event-date-title span {

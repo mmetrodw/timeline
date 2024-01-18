@@ -22,10 +22,12 @@ const defaultSettings = {
   width: "100%",
   height: "400px",
   roundness: "5px",
-  data: null
+  data: null,
+  currentEvent: 0
 }
 
 var elements = {};
+var settings;
 
 
 // Objects 
@@ -77,7 +79,7 @@ function addCssStyle(element, styles) {
   }
 }
 
-function createTimeline(settings) {
+function createTimeline() {
   if(settings.target === null) {
     throw Error("Please, add Target")
   }
@@ -95,20 +97,21 @@ function createTimeline(settings) {
   elements.navigations = [];
   let heading = null, content = null, link = null;
   
-  const timeLine = createAndAppend("DIV", elements.wrapper, "dwtl-timeline-events", {
+  elements.timeLine = createAndAppend("DIV", elements.wrapper, "dwtl-timeline-events", {
     width: "100%",
     height: "100%",
   });
   const navigationWrapper = createAndAppend("DIV", elements.wrapper, "dwtl-timeline-navigation");
   
   settings.data.forEach((period) => {
-    const event = createAndAppend("DIV", timeLine, "dwtl-event", {
+    const event = createAndAppend("DIV", elements.timeLine, "dwtl-event", {
       width: "100%",
       height: "100%",
     });
     
     if(period.image) {
       const imageWrapper = createAndAppend("DIV", event, "dwtl-event-image");
+      imageWrapper.style.setProperty("--image-width", settings.height);
       const img = createAndAppend("IMG", imageWrapper).src = period.image;
     }
     
@@ -170,46 +173,74 @@ function createTimeline(settings) {
     elements.navigations.push(navi);
   });
 
-  // Select First Item In Navigation
-  elements.navigations[0].classList.add("dwtl-active");
+  // Select First Item In Navigation and Event
+  elements.navigations[settings.currentEvent].classList.add("dwtl-active");
+  elements.periods[settings.currentEvent].classList.add("dwtl-active");
+}
+
+function calculateTotalHeight(element) {
+  let totalHeight = element.offsetHeight;
+  let sibling = element.nextElementSibling;
+  
+  while(sibling) {
+    totalHeight += 5 + sibling.offsetHeight;
+    sibling = sibling.nextElementSibling;
+  }
+
+  return totalHeight;
 }
 
 function dwtlWindowResize() {
-  console.log(elements.periods);
+  console.log("resize");
   elements.periods.forEach((period) => {
-    let items = period.querySelector(".dwtl-event-details").children;
-    let itemsAmount = items.length - 1;
-
-
-    // рекурсія, беремо хіадін, дивимось чи є після нього елемент, беремо його значення, дивимось чи є після нього елемнет
-    for(let i = 1; i < items.length; i++) {
-      let elementStartPos = 15;
-      console.log(items[i]);
-      for(let j = 1; j <= items.length; j++) {
-        elementStartPos += (itemsAmount) * 5;
-        elementStartPos += items[j].offsetHeight;
-        console.log(items[j]);
-      }
-      console.log(items[i], elementStartPos);
-      items[i].style.setProperty("--start-position", elementStartPos + "px");
-    }
+    let details = period.querySelector(".dwtl-event-details").children;
     
+    Array.from(details).forEach((detail) => {
+      if(!detail.classList.contains("dwtl-event-date")) {
+        let totalHeight = 15 + calculateTotalHeight(detail);
+        detail.style.setProperty("--start-position", totalHeight + "px");
+      }
+    });
   })
+}
+
+function slideIt() {
+  console.log("slide it")
+  elements.timeLine.style.top = -elements.timeLine.offsetHeight * settings.currentEvent + "px";
+  elements.navigations.forEach((element) => {
+    element.classList.remove("dwtl-active");
+  });
+  elements.navigations[settings.currentEvent].classList.add("dwtl-active");
+  elements.periods.forEach((element) => {
+    element.classList.remove("dwtl-active");
+  });
+  elements.periods[settings.currentEvent].classList.add("dwtl-active");
+}
+
+function dwtlNaviClick(event) {
+  const index = elements.navigations.indexOf(event.currentTarget);
+  console.log("click")
+  settings.currentEvent = index;
+  slideIt();
 }
 
 function addEventListeners() {
   window.onresize = dwtlWindowResize;
+  
+  elements.navigations.forEach((navi) => {
+    navi.addEventListener("click", dwtlNaviClick);
+  });
 }
 
 function dwTimeLine(params) {
-  const settings = replaceObjectProps(defaultSettings, params);
+  settings = replaceObjectProps(defaultSettings, params);
   
   // check data
   if(settings.data === null) {
     throw Error("No data")
   }
   
-  createTimeline(settings);
+  createTimeline();
   addEventListeners();
   console.log(elements);
 }
