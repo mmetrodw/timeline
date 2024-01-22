@@ -131,21 +131,14 @@ function createTimeline() {
       }
     }
 
-    let headingStartPos = 20,
-        contentStartPos = 20,
-        linkStartPos = 20;
-
     if (period.heading) {
       heading = createAndAppend("DIV", eventDetails, "dwtl-event-heading");
       heading.textContent  = period.heading;
-      headingStartPos += heading.offsetHeight;
     }
     
     if (period.content) {
       content = createAndAppend("DIV", eventDetails, "dwtl-event-content")
       content.textContent  = period.content;
-      headingStartPos += 5 + content.offsetHeight;
-      contentStartPos += content.offsetHeight;
     }
     
     if (period.link) {
@@ -153,21 +146,14 @@ function createTimeline() {
       link = createAndAppend("A", eventDetails, "dwtl-event-link");
       link.textContent  = linkText;
       link.href = period.link;
-      headingStartPos += 5 + link.offsetHeight;
-      contentStartPos += 5+ link.offsetHeight;
-      linkStartPos += link.offsetHeight;
     }
 
-    if(heading) {
-      heading.style.setProperty("--start-position", headingStartPos + "px");
-    }
-    if(content) {
-      content.style.setProperty("--start-position", contentStartPos + "px");
-    }
-    if(link) {
-      link.style.setProperty("--start-position", linkStartPos + "px");
-    }
-
+    Array.from(eventDetails.children).forEach((detail) => {
+      if(!detail.classList.contains("dwtl-event-date")) {
+        let totalHeight = 20 + calculateTotalHeight(detail);
+        detail.style.setProperty("--start-position", totalHeight + "px");
+      }
+    });
     elements.periods.push(event);
     const navi = createAndAppend("DIV", navigationWrapper, "dwtl-navi");
     elements.navigations.push(navi);
@@ -191,13 +177,12 @@ function calculateTotalHeight(element) {
 }
 
 function dwtlWindowResize() {
-  console.log("resize");
   elements.periods.forEach((period) => {
     let details = period.querySelector(".dwtl-event-details").children;
     
     Array.from(details).forEach((detail) => {
       if(!detail.classList.contains("dwtl-event-date")) {
-        let totalHeight = 15 + calculateTotalHeight(detail);
+        let totalHeight = 20 + calculateTotalHeight(detail);
         detail.style.setProperty("--start-position", totalHeight + "px");
       }
     });
@@ -224,12 +209,59 @@ function dwtlNaviClick(event) {
   slideIt();
 }
 
+function dwtlScrollEvent(event) {
+  console.log(event)
+  if(event.deltaY > 0) {
+    settings.currentEvent++;
+  } else {
+    settings.currentEvent--;
+  }
+  if(settings.currentEvent > settings.data.length -1) {
+    settings.currentEvent = 0;
+  }
+  if(settings.currentEvent < 0) {
+    settings.currentEvent = settings.data.length -1;
+  }
+  slideIt();
+}
+
+let mouse = {
+  x: 0,
+  y: 0
+}
+
+function dwtlOnMouseDown(event) {
+  console.log(event)
+  mouse.x = event.clientX;
+  mouse.y = event.clientY;
+  elements.wrapper.addEventListener("mousemove", dwtlOnMouseMove, {passive: true});
+}
+
+function dwtlOnMouseMove(event) {
+  let diff = {
+    x: mouse.x - event.clientX,
+    y: mouse.y - event.clientY
+  };
+  elements.timeLine.style.transform = "translateY(" + (-diff.y) + "px)";
+  console.log(elements.timeLine.style.transfrom)
+  console.log(diff);
+}
+
+function dwtlOnMouseUp(event) {
+  console.log(event)
+  elements.wrapper.removeEventListener("mousemove", dwtlOnMouseMove, {passive: true});
+}
+
 function addEventListeners() {
   window.onresize = dwtlWindowResize;
   
   elements.navigations.forEach((navi) => {
     navi.addEventListener("click", dwtlNaviClick);
   });
+
+  elements.wrapper.addEventListener("wheel", dwtlScrollEvent, {passive: true});
+  elements.wrapper.addEventListener("mousedown", dwtlOnMouseDown, {passive: true});
+  elements.wrapper.addEventListener("mouseup", dwtlOnMouseUp, {passive: true});
 }
 
 function dwTimeLine(params) {
