@@ -284,9 +284,20 @@ body {
 	border-radius: 5px;
 	box-shadow: inset 0 0 0 1px #1B998B;
 	cursor: pointer;
+	transform: scale(1);
+	transition: all 150ms cubic-bezier(.25 ,0, 0, 1);
 }
 
 .dwtl-navi:hover,
 .dwtl-navi.dwtl-active {
 	box-shadow: inset 0 0 0 5px #1B998B;
+}
+
+.dwtl-navi:hover {
+	transform: scale(1.5);
+}
+
+.dwtl-navi.dwtl-active {
+	cursor: default;
+	pointer-events: none;
 }
