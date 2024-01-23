@@ -13,7 +13,7 @@ var settings;
 
 // Objects 
 
-function cloneObject(object) {
+function dwtlCloneObject(object) {
   const clone = {};
   for(let property in object) {
     clone[property] = object[property];
@@ -21,46 +21,46 @@ function cloneObject(object) {
   return clone;
 }
 
-function replaceObjectProps(object1, object2) {
-  const object = cloneObject(object1);
+function dwtlReplaceObjectProps(object1, object2) {
+  const object = dwtlCloneObject(object1);
   for(let property in object1) {
     object[property] = object2.hasOwnProperty(property) ? object2[property] : object1[property];
   }
   return object;
 }
 
-function mergeObjects(object1, object2) {
-  const object = cloneObject(object1);
+function dwtlMergeObjects(object1, object2) {
+  const object = dwtlCloneObject(object1);
   for(let property in object2) {
     object[property] = typeof object1[property] === 'undefined' ? object2[property] : object1[property];
   }
   return object;
 }
 
-function createAndAppend(tag, parent, className, styles) {
-  const element = document.createElement(tag);
-  if (className) {
-    element.className = className
-  };
-  if (styles) {
-    addCssStyle(element, styles)
-  };
-  parent.appendChild(element);
-  return element;
-}
-
 
 // Css Style
 
-function addCssStyle(element, styles) {
+function dwtlAddCssStyle(target, styles) {
   for(let property in styles) {
     if (styles.hasOwnProperty(property)) {
-      element.style[property] = styles[property]; 
+      target.style[property] = styles[property]; 
     }
   }
 }
 
-function createTimeline() {
+function dwtlCreateAndAppend(tag, parent, className, styles) {
+  const item = document.createElement(tag);
+  if (className) {
+    item.className = className
+  };
+  if (styles) {
+    dwtlAddCssStyle(item, styles)
+  };
+  parent.appendChild(item);
+  return item;
+}
+
+function dwtlCreateTimeline() {
   if(settings.target === null) {
     throw Error("Please, add Target")
   }
@@ -68,7 +68,7 @@ function createTimeline() {
   elements.wrapper = document.getElementById(settings.target);
   elements.wrapper.classList.add("dwtl-wrapper");
   // Add style
-  addCssStyle(elements.wrapper, {
+  dwtlAddCssStyle(elements.wrapper, {
     width: settings.width,
     height: settings.height,
     borderRadius: settings.roundness
@@ -78,33 +78,33 @@ function createTimeline() {
   elements.navigations = [];
   let heading = null, content = null, link = null;
   
-  elements.timeLine = createAndAppend("DIV", elements.wrapper, "dwtl-timeline-events", {
+  elements.timeline = dwtlCreateAndAppend("DIV", elements.wrapper, "dwtl-timeline-events", {
     width: "100%",
     height: "100%",
   });
-  const navigationWrapper = createAndAppend("DIV", elements.wrapper, "dwtl-timeline-navigation");
+  const navigationWrapper = dwtlCreateAndAppend("DIV", elements.wrapper, "dwtl-timeline-navigation");
   
   settings.data.forEach((period) => {
-    const event = createAndAppend("DIV", elements.timeLine, "dwtl-event", {
+    const event = dwtlCreateAndAppend("DIV", elements.timeline, "dwtl-event", {
       width: "100%",
       height: "100%",
     });
     
     if(period.image) {
-      const imageWrapper = createAndAppend("DIV", event, "dwtl-event-image");
+      const imageWrapper = dwtlCreateAndAppend("DIV", event, "dwtl-event-image");
       imageWrapper.style.setProperty("--image-width", settings.height);
-      const img = createAndAppend("IMG", imageWrapper).src = period.image;
+      const img = dwtlCreateAndAppend("IMG", imageWrapper).src = period.image;
     }
     
-    const eventDetails = createAndAppend("DIV", event, "dwtl-event-details");
+    const eventDetails = dwtlCreateAndAppend("DIV", event, "dwtl-event-details");
     
     if (period.date) {
-      const date = createAndAppend("DIV", eventDetails, "dwtl-event-date");
-      const eventDateTitle = createAndAppend("DIV", event, "dwtl-event-date-title");
+      const date = dwtlCreateAndAppend("DIV", eventDetails, "dwtl-event-date");
+      const eventDateTitle = dwtlCreateAndAppend("DIV", event, "dwtl-event-date-title");
       let index = 0;
       
       for (let spanText of period.date) {
-        const span = createAndAppend("SPAN", eventDateTitle);
+        const span = dwtlCreateAndAppend("SPAN", eventDateTitle);
         span.textContent  = spanText;
         span.style.setProperty("--span-delay", 100 * index + "ms");
         date.appendChild(span.cloneNode(true));
@@ -113,30 +113,30 @@ function createTimeline() {
     }
 
     if (period.heading) {
-      heading = createAndAppend("DIV", eventDetails, "dwtl-event-heading");
+      heading = dwtlCreateAndAppend("DIV", eventDetails, "dwtl-event-heading");
       heading.textContent  = period.heading;
     }
     
     if (period.content) {
-      content = createAndAppend("DIV", eventDetails, "dwtl-event-content")
+      content = dwtlCreateAndAppend("DIV", eventDetails, "dwtl-event-content")
       content.textContent  = period.content;
     }
     
     if (period.link) {
       const linkText = period.linkText || "Read more";
-      link = createAndAppend("A", eventDetails, "dwtl-event-link");
+      link = dwtlCreateAndAppend("A", eventDetails, "dwtl-event-link");
       link.textContent  = linkText;
       link.href = period.link;
     }
 
     Array.from(eventDetails.children).forEach((detail) => {
       if(!detail.classList.contains("dwtl-event-date")) {
-        let totalHeight = 20 + calculateTotalHeight(detail);
+        let totalHeight = 20 + dwtlCalculateTotalHeight(detail);
         detail.style.setProperty("--start-position", totalHeight + "px");
       }
     });
     elements.periods.push(event);
-    const navi = createAndAppend("DIV", navigationWrapper, "dwtl-navi");
+    const navi = dwtlCreateAndAppend("DIV", navigationWrapper, "dwtl-navi");
     elements.navigations.push(navi);
   });
 
@@ -145,9 +145,9 @@ function createTimeline() {
   elements.periods[settings.currentEvent].classList.add("dwtl-active");
 }
 
-function calculateTotalHeight(element) {
-  let totalHeight = element.offsetHeight;
-  let sibling = element.nextElementSibling;
+function dwtlCalculateTotalHeight(item) {
+  let totalHeight = item.offsetHeight;
+  let sibling = item.nextElementSibling;
   
   while(sibling) {
     totalHeight += 5 + sibling.offsetHeight;
@@ -163,35 +163,44 @@ function dwtlWindowResize() {
     
     Array.from(details).forEach((detail) => {
       if(!detail.classList.contains("dwtl-event-date")) {
-        let totalHeight = 20 + calculateTotalHeight(detail);
+        let totalHeight = 20 + dwtlCalculateTotalHeight(detail);
         detail.style.setProperty("--start-position", totalHeight + "px");
       }
     });
   })
 }
 
-function setActiveClass(elements, index) {
-  elements.forEach((element) => {
-    element.classList.remove("dwtl-active");
+function dwtlSetActiveClass(elements, index) {
+  elements.forEach((item) => {
+    item.classList.remove("dwtl-active");
   });
   elements[index].classList.add("dwtl-active");
 }
 
-function slideIt() {
+function dwtlSlideIt() {
   console.log("slide it")
-  elements.timeLine.style.top = -elements.timeLine.offsetHeight * settings.currentEvent + "px";
-  setActiveClass(elements.navigations, settings.currentEvent);
-  setActiveClass(elements.periods, settings.currentEvent);
+  //elements.timeline.style.transition = "all 0.5s ease-in-out";
+  elements.timeline.style.top = -elements.timeline.offsetHeight * settings.currentEvent + "px";
+  elements.timeline.style.transform = "translateY(0px)";
+  elements.timeline.style.cursor = "";
+  if(currentDetails) {
+    Array.from(currentDetails).forEach((item) => {
+      item.style.transform = "translateY(var(--start-position))";
+      item.style.animation = "";
+    });
+  }
+  dwtlSetActiveClass(elements.navigations, settings.currentEvent);
+  dwtlSetActiveClass(elements.periods, settings.currentEvent);
 }
 
 function dwtlNaviClick(event) {
   const index = elements.navigations.indexOf(event.currentTarget);
   console.log("click")
   settings.currentEvent = index;
-  slideIt();
+  dwtlSlideIt();
 }
 
-function slideDirection(direction) {
+function dwtlSlideDirection(direction) {
   if(direction) {
     settings.currentEvent++;
     if (settings.currentEvent > settings.data.length - 1) {
@@ -206,22 +215,75 @@ function slideDirection(direction) {
 }
 
 function dwtlScrollEvent(event) {
-  slideDirection(event.deltaY > 0);
-  slideIt();
+  event.preventDefault();
+  dwtlSlideDirection(event.deltaY > 0);
+  dwtlSlideIt();
 }
 
 let touchX = 0;
 let touchY = 0;
 let currentDetails = null;
 
-function dwtlHandleTouchStart(event) {
+function dwtlHandleMouseDown(event) {
+  const targetElement = event.target;
+  const excludeClasses = ['dwtl-event-date', 'dwtl-event-heading', 'dwtl-event-content', 'dwtl-event-link', 'dwtl-event-image'];
+  if (excludeClasses.some(className => targetElement.classList.contains(className))) {
+    return false;
+  }
+  touchX = event.clientX;
+  touchY = event.clientY;
+
+  currentDetails = elements.periods[settings.currentEvent].querySelector(".dwtl-event-details").children;
+  elements.timeline.style.cursor = "grabbing";
+
+  elements.timeline.addEventListener("mousemove", dwtlHandleMouseMove, {passive: false});
+}
+
+function dwtlHandleMouseMove(event) {
   event.preventDefault();
+  const diffX = event.clientX - touchX;
+  const diffY = event.clientY - touchY;
+
+  elements.timeline.style.transform = "translateY(" + diffY +"px)";
+
+  let speed = 1;
+  const order = diffY < 0 ? Array.from(currentDetails) : Array.from(currentDetails).reverse();
+  order.forEach((item) => {
+    speed -= 0.25;
+    item.style.transform = "translateY(" + diffY * speed +"px)";
+    item.style.animation = "none";
+  });
   
+  if(Math.abs(diffY) > 100) {
+    if(diffY < 0) {
+      dwtlSlideDirection(true);
+    } else {
+      dwtlSlideDirection(false);
+    }
+    dwtlSlideIt();
+    elements.timeline.removeEventListener("mousemove", dwtlHandleMouseMove);
+    elements.timeline.style.cursor = "";
+  }
+}
+
+function dwtlHandleMouseUp() {
+  dwtlSlideIt();
+  currentDetails = null;
+  elements.timeline.removeEventListener("mousemove", dwtlHandleMouseMove);
+}
+
+function dwtlHandleTouchStart(event) {
+  const targetElement = event.target;
+  console.log(targetElement)
+  const excludeClasses = ['dwtl-event-date', 'dwtl-event-heading', 'dwtl-event-content', 'dwtl-event-link', 'dwtl-event-image'];
+  if (excludeClasses.some(className => targetElement.classList.contains(className))) {
+    return false;
+  }
   touchX = event.touches[0].clientX;
   touchY = event.touches[0].clientY;
   currentDetails = elements.periods[settings.currentEvent].querySelector(".dwtl-event-details").children;
   
-  elements.wrapper.addEventListener("touchmove", dwtlHandleTouchMove, {passive: true});
+  elements.timeline.addEventListener("touchmove", dwtlHandleTouchMove, {passive: false});
 }
 
 function dwtlHandleTouchMove(event) {
@@ -229,7 +291,7 @@ function dwtlHandleTouchMove(event) {
   const diffX = event.touches[0].clientX - touchX;
   const diffY = event.touches[0].clientY - touchY;
   
-  elements.timeLine.style.transform = "translateY(" + diffY +"px)";
+  elements.timeline.style.transform = "translateY(" + diffY +"px)";
   
   let speed = 1;
   const order = diffY < 0 ? Array.from(currentDetails) : Array.from(currentDetails).reverse();
@@ -241,51 +303,47 @@ function dwtlHandleTouchMove(event) {
   
   if(Math.abs(diffY) > 100) {
     if(diffY < 0) {
-      slideDirection(true);
+      dwtlSlideDirection(true);
     } else {
-      slideDirection(false);
+      dwtlSlideDirection(false);
     }
-    slideIt();
-    elements.wrapper.removeEventListener("touchmove", dwtlHandleTouchMove, {passive: true});
+    dwtlSlideIt();
+    elements.timeline.removeEventListener("touchmove", dwtlHandleTouchMove);
   }
 }
 
 function dwtlHandleTouchEnd(event) {
   event.preventDefault();
-  elements.timeLine.style.transform = "translateY(0px)";
-  
-  Array.from(currentDetails).forEach((item) => {
-    item.style.transform = "translateY(var(--start-position))";
-    item.style.animation = "";
-  });
+  dwtlSlideIt();
   currentDetails = null;
-  elements.wrapper.removeEventListener("touchmove", dwtlHandleTouchMove, {passive: true});
+  elements.timeline.removeEventListener("touchmove", dwtlHandleTouchMove);
 }
 
-function addEventListeners() {
+function dwtlAddEvents() {
   window.onresize = dwtlWindowResize;
   
   elements.navigations.forEach((navi) => {
     navi.addEventListener("click", dwtlNaviClick);
   });
 
-  elements.wrapper.addEventListener("wheel", dwtlScrollEvent, {passive: true});
-  //elements.wrapper.addEventListener("mousedown", dwtlOnMouseDown, {passive: true});
-  //elements.wrapper.addEventListener("mouseup", dwtlOnMouseUp, {passive: true});
-  elements.wrapper.addEventListener("touchstart", dwtlHandleTouchStart, {passive: true});
-  elements.wrapper.addEventListener("touchend", dwtlHandleTouchEnd, {passive: true});
+  elements.timeline.addEventListener("wheel", dwtlScrollEvent, {passive: false});
+  elements.timeline.addEventListener("mousedown", dwtlHandleMouseDown, {passive: false});
+  elements.timeline.addEventListener("mouseup", dwtlHandleMouseUp, {passive: false});
+  elements.timeline.addEventListener("mouseleave", dwtlHandleMouseUp, {passive: false});
+  elements.timeline.addEventListener("touchstart", dwtlHandleTouchStart, {passive: false});
+  elements.timeline.addEventListener("touchend", dwtlHandleTouchEnd, {passive: false});
 }
 
 function dwTimeLine(params) {
-  settings = replaceObjectProps(defaultSettings, params);
+  settings = dwtlReplaceObjectProps(defaultSettings, params);
   
   // check data
   if(settings.data === null) {
     throw Error("No data")
   }
   
-  createTimeline();
-  addEventListeners();
+  dwtlCreateTimeline();
+  dwtlAddEvents();
   console.log(elements);
 }
 
@@ -302,5 +360,10 @@ let tl = dwTimeLine({
     content: "Aliquam ut porttitor leo a diam sollicitudin tempor id. Nunc pulvinar sapien et ligula ullamcorper malesuada. Ornare arcu odio ut sem nulla pharetra diam sit.",
     link: "#",
     linkText: "Читати повністю"
+  }, {
+    date: "2021",
+    heading: "Nunc eget lorem dolor sed viverra.",
+    link: "#",
+    linkText: "Read More"
   }]
 })
