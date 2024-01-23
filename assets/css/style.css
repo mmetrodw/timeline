@@ -43,6 +43,10 @@ body {
 	align-items: stretch;
 }
 
+.dwtl-event:nth-child(2) {
+  background: red;
+}
+
 .dwtl-event-image {
 	position: relative;
 	height: 100%;

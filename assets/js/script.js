@@ -1,22 +1,3 @@
-/* COMMENT 
-var heading = document.querySelector(".dwtl-event-heading");
-var content = document.querySelector(".dwtl-event-content");
-var image = document.querySelector(".dwtl-event-image");
-
-function dwtlWindowResize() {
-  image.style.setProperty('--image-width', image.offsetHeight + "px");
-  heading.style.setProperty('--heading-start-position', heading.offsetHeight + 5 + content.offsetHeight + 20 + "px");
-  content.style.setProperty('--start-position', content.offsetHeight + 20 + "px");
-}
-
-window.onresize = dwtlWindowResize;
-
-dwtlWindowResize();
-*/
-
-
-
-
 const defaultSettings = {
   target: null,
   width: "100%",
@@ -189,17 +170,18 @@ function dwtlWindowResize() {
   })
 }
 
+function setActiveClass(elements, index) {
+  elements.forEach((element) => {
+    element.classList.remove("dwtl-active");
+  });
+  elements[index].classList.add("dwtl-active");
+}
+
 function slideIt() {
   console.log("slide it")
   elements.timeLine.style.top = -elements.timeLine.offsetHeight * settings.currentEvent + "px";
-  elements.navigations.forEach((element) => {
-    element.classList.remove("dwtl-active");
-  });
-  elements.navigations[settings.currentEvent].classList.add("dwtl-active");
-  elements.periods.forEach((element) => {
-    element.classList.remove("dwtl-active");
-  });
-  elements.periods[settings.currentEvent].classList.add("dwtl-active");
+  setActiveClass(elements.navigations, settings.currentEvent);
+  setActiveClass(elements.periods, settings.currentEvent);
 }
 
 function dwtlNaviClick(event) {
@@ -209,47 +191,75 @@ function dwtlNaviClick(event) {
   slideIt();
 }
 
-function dwtlScrollEvent(event) {
-  console.log(event)
-  if(event.deltaY > 0) {
+function slideDirection(direction) {
+  if(direction) {
     settings.currentEvent++;
+    if (settings.currentEvent > settings.data.length - 1) {
+      settings.currentEvent = 0;
+    }
   } else {
     settings.currentEvent--;
+    if (settings.currentEvent < 0) {
+      settings.currentEvent = settings.data.length - 1;
+    }
   }
-  if(settings.currentEvent > settings.data.length -1) {
-    settings.currentEvent = 0;
-  }
-  if(settings.currentEvent < 0) {
-    settings.currentEvent = settings.data.length -1;
-  }
+}
+
+function dwtlScrollEvent(event) {
+  slideDirection(event.deltaY > 0);
   slideIt();
 }
 
-let mouse = {
-  x: 0,
-  y: 0
+let touchX = 0;
+let touchY = 0;
+let currentDetails = null;
+
+function dwtlHandleTouchStart(event) {
+  event.preventDefault();
+  
+  touchX = event.touches[0].clientX;
+  touchY = event.touches[0].clientY;
+  currentDetails = elements.periods[settings.currentEvent].querySelector(".dwtl-event-details").children;
+  
+  elements.wrapper.addEventListener("touchmove", dwtlHandleTouchMove, {passive: true});
 }
 
-function dwtlOnMouseDown(event) {
-  console.log(event)
-  mouse.x = event.clientX;
-  mouse.y = event.clientY;
-  elements.wrapper.addEventListener("mousemove", dwtlOnMouseMove, {passive: true});
+function dwtlHandleTouchMove(event) {
+  event.preventDefault();
+  const diffX = event.touches[0].clientX - touchX;
+  const diffY = event.touches[0].clientY - touchY;
+  
+  elements.timeLine.style.transform = "translateY(" + diffY +"px)";
+  
+  let speed = 1;
+  const order = diffY < 0 ? Array.from(currentDetails) : Array.from(currentDetails).reverse();
+  order.forEach((item) => {
+    speed -= 0.25;
+    item.style.transform = "translateY(" + diffY * speed +"px)";
+    item.style.animation = "none";
+  });
+  
+  if(Math.abs(diffY) > 100) {
+    if(diffY < 0) {
+      slideDirection(true);
+    } else {
+      slideDirection(false);
+    }
+    slideIt();
+    elements.wrapper.removeEventListener("touchmove", dwtlHandleTouchMove, {passive: true});
+  }
 }
 
-function dwtlOnMouseMove(event) {
-  let diff = {
-    x: mouse.x - event.clientX,
-    y: mouse.y - event.clientY
-  };
-  elements.timeLine.style.transform = "translateY(" + (-diff.y) + "px)";
-  console.log(elements.timeLine.style.transfrom)
-  console.log(diff);
-}
-
-function dwtlOnMouseUp(event) {
-  console.log(event)
-  elements.wrapper.removeEventListener("mousemove", dwtlOnMouseMove, {passive: true});
+function dwtlHandleTouchEnd(event) {
+  event.preventDefault();
+  elements.timeLine.style.transform = "translateY(0px)";
+  
+  Array.from(currentDetails).forEach((item) => {
+    item.style.transform = "translateY(var(--start-position))";
+    item.style.animation = "";
+  });
+  currentDetails = null;
+  elements.wrapper.removeEventListener("touchmove", dwtlHandleTouchMove, {passive: true});
 }
 
 function addEventListeners() {
@@ -260,8 +270,10 @@ function addEventListeners() {
   });
 
   elements.wrapper.addEventListener("wheel", dwtlScrollEvent, {passive: true});
-  elements.wrapper.addEventListener("mousedown", dwtlOnMouseDown, {passive: true});
-  elements.wrapper.addEventListener("mouseup", dwtlOnMouseUp, {passive: true});
+  //elements.wrapper.addEventListener("mousedown", dwtlOnMouseDown, {passive: true});
+  //elements.wrapper.addEventListener("mouseup", dwtlOnMouseUp, {passive: true});
+  elements.wrapper.addEventListener("touchstart", dwtlHandleTouchStart, {passive: true});
+  elements.wrapper.addEventListener("touchend", dwtlHandleTouchEnd, {passive: true});
 }
 
 function dwTimeLine(params) {
