@@ -89,7 +89,7 @@ body {
 	padding: 20px;
 	
 	order: 0;
-	flex: 0 0 auto;
+	flex: 1 1 auto;
 	align-self: auto;
 
 	display: flex;
@@ -154,6 +154,10 @@ body {
 .dwtl-event-content a {
   color: inherit;
   font-weight: 900;
+}
+
+.dwtl-event-content p {
+  margin: 10px 0;
 }
 
 .dwtl-active .dwtl-event-content {
