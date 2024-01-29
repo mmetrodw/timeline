@@ -10,6 +10,7 @@ class dwTimeLine {
 	#elements = [];
 	#currentEvent = 0;
 	#isSliding = false;
+	#maxHeight = 0;
 	
 	constructor(params) {
 		this.#settings = this.#replaceObjectProps(this.#defaultSettings, params);
@@ -54,11 +55,17 @@ class dwTimeLine {
 		// Select First Item In Navigation and Event
 		elements.navigations[this.#currentEvent].classList.add("dwtl-active");
 		elements.events[this.#currentEvent].classList.add("dwtl-active");
+		
 		// Resolve height
-		console.log(elements.events)
-		elements.events.forEach((event) => {
-		  console.log(event.offsetHeight)
-		})
+		const maxHeight = Math.max(
+			this.#maxHeight,
+			...elements.events.map((event) => event.querySelector(".dwtl-event-details").offsetHeight)
+		);
+
+		if (maxHeight > this.#maxHeight) {
+			elements.wrapper.style.height = maxHeight + 40 + "px";
+			this.#maxHeight = maxHeight;
+		}
 	}
 	
 	#createEvent(data) {
