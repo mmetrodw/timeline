@@ -16,7 +16,7 @@ body {
 
 	overflow: hidden;
 	--easyEntrance: cubic-bezier(.15, 0, 0, 1);
-	--smoothExit: cubic-bezier(1, 0, .8, 1);
+	--smoothExit: cubic-bezier(1, 0, .9, 1);
 	--gentleInflow: cubic-bezier(.25, 0, 0, 1);
 	--harmoniousEase: cubic-bezier(1, 0, 1, 1);
 }
@@ -32,7 +32,7 @@ body {
   flex: 1 1 auto;
   align-self: auto;
 	cursor: grab;
-	transition: all 150ms var(--easyEntrance);
+	transition: all 300ms var(--gentleInflow);
 }
 
 .dwtl-event {
@@ -55,9 +55,10 @@ body {
 
 .dwtl-event-image {
 	position: relative;
+	width: auto;
 	height: 100%;
 	order: 0;
-	flex: 0 0 var(--image-width);
+	flex: 0 0 auto;
 	align-self: auto;
 	clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
 	cursor: default;
@@ -123,23 +124,7 @@ body {
 }
 
 .dwtl-active .dwtl-event-date span {
-  animation-name: period-date-in;
-  animation-duration: .5s;
-  animation-timing-function: var(--gentleInflow);
-  animation-fill-mode: forwards;
-}
-
-.dwtl-event-date span {
-	animation-delay: calc(2s + var(--span-delay));
-}
-
-@keyframes period-date-in {
-	0% {
-		transform: translateY(100%);
-	}
-	100% {
-		transform: translateY(0%);
-	}
+	animation: event-chars-animation-in 600ms var(--gentleInflow) forwards;
 }
 
 .dwtl-event-heading {
@@ -149,18 +134,11 @@ body {
 	line-height: 30px;
 	font-weight: 700;
 	color: #F2F2F2;
-	transform: translateY(var(--start-position));
 	cursor: text;
 }
 
 .dwtl-active .dwtl-event-heading {
-  animation: translate-to-top 1s var(--gentleInflow) 2s forwards;
-}
-
-@keyframes heading-in {
-	to {
-		transform: translateY(0px);
-	}
+	animation: event-chars-animation-in 1s var(--gentleInflow) 2s forwards;
 }
 
 .dwtl-event-content {
@@ -170,12 +148,11 @@ body {
 	line-height: 20px;
 	font-weight: 400;
 	color: #F2F2F2;
-	transform: translateY(var(--start-position));
 	cursor: text;
 }
 
 .dwtl-active .dwtl-event-content {
-  animation: translate-to-top 1s var(--gentleInflow) 2.2s forwards;
+	animation: event-chars-animation-in 1s var(--gentleInflow) 2.2s forwards;
 }
 
 .dwtl-event-link {
@@ -189,31 +166,17 @@ body {
 	color: #1B998B;
 	background: #F2F2F2;
   border-radius: 5px;
-  transform: translateY(var(--start-position));
 	cursor: pointer;
 }
-  
+
 .dwtl-active .dwtl-event-link {
-  animation: translate-to-top 1s var(--gentleInflow) 2.5s forwards;
+	animation: event-chars-animation-in 1s var(--gentleInflow) 2.4s forwards;
 }
 
-@keyframes translate-to-top {
-  to {
-    transform: translateY(0px);
-  }
-}
-
-.dwtl-event-date-title {
+.dwtl-event-title {
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	font-family: 'Inter', sans-serif;
-	font-size: 120px;
-	line-height: 120px;
-	font-weight: 900;
-	color: #F2F2F2;
-	transform-origin: 50% 50%;
-	transform: translate(-50%, -50%) scale(1);
 	
 	display: flex;
 	flex-direction: row;
@@ -223,50 +186,45 @@ body {
 	align-items: center;
 	overflow: hidden;
 
+	font-family: 'Inter', sans-serif;
+	font-size: 120px;
+	line-height: 120px;
+	font-weight: 900;
+	color: #F2F2F2;
+	transform-origin: 50% 50%;
+	transform: translate(-50%, -50%) scale(2);
 	z-index: 5;
 	pointer-events: none;
 }
 
-.dwtl-active .dwtl-event-date-title {
-  animation: opener-date-scale 1s var(--smoothExit) forwards;
+.dwtl-active .dwtl-event-title  {
+	animation: event-title-scale-animation 1s var(--smoothExit) forwards;
 }
 
-@keyframes opener-date-scale {
-	0% {
-		transform: translate(-50%, -50%) scale(2);
-	}
-	100% {
+@keyframes event-title-scale-animation {
+	to {
 		transform: translate(-50%, -50%) scale(1);
 	}
 }
 
-
-.dwtl-event-date-title span {
+.dwtl-event-title span {
 	display: block;
 	transform-origin: 50% 50%;
 	transform: translateY(100%);
 }
 
-.dwtl-active .dwtl-event-date-title span {
-  animation-name: opener-date-in-out;
-  animation-duration: 2s;
-  animation-timing-function: var(--gentleInflow);
-  animation-fill-mode: forwards;
+.dwtl-active .dwtl-event-title span {
+	animation: event-chars-animation-in 800ms var(--gentleInflow) forwards, event-chars-animation-out 1s var(--harmoniousEase) 1s forwards;
 }
 
-.dwtl-event-date-title span {
-	animation-delay: var(--span-delay);
-}
-
-@keyframes opener-date-in-out {
-	0% {
-		transform: translateY(100%);
-	}
-	50% {
+@keyframes event-chars-animation-in {
+	to {
 		transform: translateY(0%);
-		animation-timing-function: cubic-bezier(1, 0, 1, 1);
 	}
-	100% {
+}
+
+@keyframes event-chars-animation-out {
+	to {
 		transform: translateY(-100%);
 	}
 }
@@ -290,6 +248,7 @@ body {
 	order: 0;
 	flex: 0 0 30px;
 	align-self: auto;
+	z-index: 2;
 }
 
 .dwtl-navi {
@@ -303,16 +262,40 @@ body {
 	transition: all 150ms var(--gentleInflow);
 }
 
-.dwtl-navi:hover,
 .dwtl-navi.dwtl-active {
-	box-shadow: inset 0 0 0 5px #1B998B;
+	box-shadow: inset 0 0 0 5px #1B998B, 0 0 0 0px #1B998B;
 }
 
 .dwtl-navi:hover {
-	transform: scale(1.5);
+	box-shadow: inset 0 0 0 5px #1B998B, 0 0 0 2.5px #1B998B;
 }
 
 .dwtl-navi.dwtl-active {
 	cursor: default;
 	pointer-events: none;
+}
+
+.dwtl-timeline-navigation-tooltip {
+	position: absolute;
+	width: auto;
+	height: 26px;
+	padding: 6px;
+	top: -8px;
+	right: 20px;
+	border-radius: 5px 0px 0px 5px;
+	background: #F2F2F2;
+	color: #1B998B;
+	font-family: 'Inter', sans-serif;
+	font-size: 12px;
+	line-height: 14px;
+	font-weight: 900;
+	pointer-events: none;
+	z-index: 1;
+	transform-origin: 100% 50%;
+	transform: rotateY(90deg);
+	transition: transform 150ms var(--gentleInflow);
+}
+
+.dwtl-navi:hover .dwtl-timeline-navigation-tooltip {
+	transform: rotateY(0deg);
 }
