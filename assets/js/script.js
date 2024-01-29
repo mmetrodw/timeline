@@ -54,6 +54,11 @@ class dwTimeLine {
 		// Select First Item In Navigation and Event
 		elements.navigations[this.#currentEvent].classList.add("dwtl-active");
 		elements.events[this.#currentEvent].classList.add("dwtl-active");
+		// Resolve height
+		console.log(elements.events)
+		elements.events.forEach((event) => {
+		  console.log(event.offsetHeight)
+		})
 	}
 	
 	#createEvent(data) {
